@@ -48,6 +48,12 @@ def test_two_bursts_separated_by_quiet_period_are_two_episodes():
     assert len(spikes) == 2
 
 
+def test_rate_hovering_near_threshold_does_not_flap():
+    # ~1 error every 5.5s keeps the 60s window at 10-11 errors, then dips to 9-10
+    recs = errors("api", 60, every=5.5)
+    assert len(detect_spikes(recs, window_seconds=60, threshold=10)) == 1
+
+
 def test_services_are_tracked_independently():
     recs = errors("api", 6) + errors("db", 6)
     assert detect_spikes(recs, 60, 10) == []

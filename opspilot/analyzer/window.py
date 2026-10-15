@@ -3,8 +3,10 @@
 For each service we keep a deque of the timestamps of its recent error lines.
 Old entries fall off the left as time moves forward, so the deque length is
 always "errors in the last W seconds". When it reaches the threshold a spike
-episode starts; the episode ends once the rate drops back below threshold.
-Each episode is reported once, with its peak rate and the most common error.
+episode starts. The episode only ends once the rate falls to half the
+threshold (hysteresis), so a rate hovering around the threshold is reported
+as one episode instead of flapping into many. Each episode is reported once,
+with its peak rate and the most common error.
 """
 
 from __future__ import annotations
@@ -43,6 +45,7 @@ class SpikeDetector:
             raise ValueError("window_seconds and threshold must be positive")
         self.window = timedelta(seconds=window_seconds)
         self.threshold = threshold
+        self.clear_below = max(1, threshold // 2)
         self._services: dict[str, _ServiceWindow] = {}
         self._finished: list[Spike] = []
 
@@ -57,7 +60,7 @@ class SpikeDetector:
             times.popleft()
 
         if state.active is not None:
-            if len(times) < self.threshold:
+            if len(times) < self.clear_below:
                 self._finished.append(state.active)
                 state.active = None
             else:
