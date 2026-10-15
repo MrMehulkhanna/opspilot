@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import click
@@ -9,7 +10,9 @@ from flask import Flask, current_app
 
 from opspilot.db import drop_all, init_schema
 
-DEFAULT_RUNBOOK_DIR = Path(__file__).resolve().parent.parent / "runbooks"
+DEFAULT_RUNBOOK_DIR = Path(
+    os.environ.get("OPSPILOT_RUNBOOK_DIR", Path(__file__).resolve().parent.parent / "runbooks")
+)
 
 
 def register_cli(app: Flask) -> None:

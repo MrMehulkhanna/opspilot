@@ -3,7 +3,7 @@
 set -e
 export FLASK_APP=opspilot.wsgi
 flask init-db
-flask load-runbooks /app/runbooks
+flask load-runbooks
 if [ "${OPSPILOT_SEED_DEMO:-0}" = "1" ]; then
     flask seed-demo
 fi
