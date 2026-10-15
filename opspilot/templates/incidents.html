@@ -35,7 +35,11 @@
       <td>{{ i.opened_at|ts }}</td>
       <td>
         {% if i.sla.resolve_seconds_remaining is not none %}
-          <span class="sla {{ 'breached' if i.sla.resolve_breached else 'ok' }}">{{ i.sla.resolve_seconds_remaining|duration }}</span>
+          {% if i.sla.resolve_seconds_remaining < 0 %}
+          <span class="sla breached">{{ (-i.sla.resolve_seconds_remaining)|duration }} over</span>
+          {% else %}
+          <span class="sla ok">{{ i.sla.resolve_seconds_remaining|duration }} left</span>
+          {% endif %}
         {% elif i.sla.resolve_breached %}<span class="sla breached">missed</span>
         {% else %}<span class="sla met">met</span>{% endif %}
       </td>
