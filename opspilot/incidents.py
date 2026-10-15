@@ -42,19 +42,20 @@ def open_incident(
 
     ack_due, resolve_due = lifecycle.sla_deadlines(severity, opened_at)
     try:
-        with conn.begin_nested():
-            incident_id = store.insert(
-                conn,
-                service_id=service["id"],
-                title=title.strip()[:200],
-                severity=severity,
-                opened_at=opened_at,
-                ack_due_at=ack_due,
-                resolve_due_at=resolve_due,
-                error_count=error_count,
-                sample_message=sample_message,
-            )
-    except IntegrityError as exc:  # lost a race with another writer
+        incident_id = store.insert(
+            conn,
+            service_id=service["id"],
+            title=title.strip()[:200],
+            severity=severity,
+            opened_at=opened_at,
+            ack_due_at=ack_due,
+            resolve_due_at=resolve_due,
+            error_count=error_count,
+            sample_message=sample_message,
+        )
+    except IntegrityError as exc:
+        # Lost a race with a concurrent writer; the partial unique index
+        # caught it. The caller's transaction is rolled back.
         raise Conflict(f"service {service_name!r} already has an active incident") from exc
 
     events.record(
