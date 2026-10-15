@@ -73,6 +73,7 @@ def analyze_logs(
             "peak_errors_in_window": spike.peak_errors_in_window,
             "window_seconds": window_seconds,
             "total_errors": spike.total_errors,
+            "top_message": spike.top_message,
         }
         if active:
             incident_store.add_errors(conn, active["id"], spike.total_errors, spike.top_message)

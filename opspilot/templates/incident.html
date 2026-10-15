@@ -97,6 +97,7 @@
           {% if e.kind == 'status_change' %}moved {{ e.from_status }} → {{ e.to_status }}
           {% elif e.kind == 'created' %}opened the incident
           {% elif e.kind == 'spike' %}spike: {{ e.detail.peak_errors_in_window }} errors / {{ e.detail.window_seconds }}s
+            {% if e.detail.top_message and e.detail.top_message != incident.sample_message %}<p>{{ e.detail.top_message }}</p>{% endif %}
           {% elif e.kind == 'comment' %}commented
           {% elif e.kind == 'assigned' %}assigned {{ e.detail.assignee }}
           {% elif e.kind == 'ai_suggested' %}generated a {{ e.detail.source|upper }} triage suggestion

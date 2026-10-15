@@ -26,12 +26,15 @@ def test_spike_opens_incident_and_records_ingest(engine):
 
 def test_repeat_spike_attaches_to_active_incident(engine):
     with engine.begin() as conn:
-        first = analyze_logs(conn, _lines("auth", 12))
-        second = analyze_logs(conn, _lines("auth", 15, minute=10))
+        first = analyze_logs(conn, _lines("auth", 12, msg="invalid token"))
+        second = analyze_logs(conn, _lines("auth", 15, minute=10, msg="clock skew"))
         incident = incident_store.get(conn, first.opened[0])
+        spikes = [e for e in events.for_incident(conn, incident["id"]) if e["kind"] == "spike"]
     assert second.opened == []
     assert second.updated == first.opened
     assert incident["error_count"] == 27
+    assert incident["sample_message"] == "invalid token"  # original error is kept
+    assert spikes[-1]["detail"]["top_message"] == "clock skew"
 
 
 def test_quiet_logs_open_nothing(engine):

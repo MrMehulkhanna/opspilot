@@ -139,10 +139,12 @@ def update_fields(conn: Connection, incident_id: int, **fields) -> None:
 
 
 def add_errors(conn: Connection, incident_id: int, count: int, sample: str | None) -> None:
+    """Attach more errors to an incident. The first sample message is kept,
+    since it is what the incident title and triage were based on."""
     conn.execute(
         text(
             "UPDATE incidents SET error_count = error_count + :count,"
-            " sample_message = COALESCE(:sample, sample_message) WHERE id = :id"
+            " sample_message = COALESCE(sample_message, :sample) WHERE id = :id"
         ),
         {"count": count, "sample": sample, "id": incident_id},
     )
