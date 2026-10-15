@@ -19,7 +19,7 @@
 <section class="panel result">
   <h2>Result</h2>
   <p>{{ result.lines_parsed }} of {{ result.lines_total }} lines parsed · {{ result.error_lines }} errors ·
-     <b>{{ result.spikes_detected }} spikes</b></p>
+     <b>{{ result.spikes_detected }} spike{{ '' if result.spikes_detected == 1 else 's' }}</b></p>
   {% if result.incidents_opened %}<p>Opened:
     {% for id in result.incidents_opened %}<a href="{{ url_for('web.incident_detail', incident_id=id) }}">#{{ id }}</a> {% endfor %}</p>{% endif %}
   {% if result.incidents_updated %}<p>Added to active:
