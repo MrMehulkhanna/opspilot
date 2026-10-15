@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Runbooks{% endblock %}
+{% block content %}
+<h1>Runbooks</h1>
+<p class="hint">The knowledge base the AI triage retrieves from (BM25). Load more with <code>flask load-runbooks DIR</code>.</p>
+{% for rb in runbooks %}
+<details class="panel runbook">
+  <summary><b>{{ rb.title }}</b>{% if rb.service_tag %} <span class="pill">{{ rb.service_tag }}</span>{% endif %}</summary>
+  <pre>{{ rb.body }}</pre>
+</details>
+{% else %}
+<p class="empty">No runbooks loaded. Run <code>flask --app opspilot.wsgi load-runbooks</code>.</p>
+{% endfor %}
+{% endblock %}

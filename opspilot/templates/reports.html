@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="panel-head">
+  <h1>Reports</h1>
+  <form method="get" class="filters">
+    <select name="days" onchange="this.form.submit()">
+      {% for d in (7, 30, 90) %}<option value="{{ d }}" {{ 'selected' if d == days }}>Last {{ d }} days</option>{% endfor %}
+    </select>
+    <noscript><button>Go</button></noscript>
+  </form>
+</div>
+
+<section class="cards">
+  <div class="card"><div class="label">AI acceptance</div>
+    <div class="value">{{ ai.overall.acceptance_rate if ai.overall.acceptance_rate is not none else '—' }}{% if ai.overall.acceptance_rate is not none %}%{% endif %}</div>
+    <div class="sub">{{ ai.overall.reviewed }} reviewed · {{ ai.overall.pending }} pending</div></div>
+  <div class="card"><div class="label">Accepted as-is</div>
+    <div class="value">{{ ai.overall.as_is_rate if ai.overall.as_is_rate is not none else '—' }}{% if ai.overall.as_is_rate is not none %}%{% endif %}</div>
+    <div class="sub">{{ ai.overall.edited }} edited · {{ ai.overall.rejected }} rejected</div></div>
+</section>
+
+<section class="panel">
+  <h2>SLA breaches by service</h2>
+  <table class="grid">
+    <thead><tr><th>Service</th><th>Severity</th><th>Incidents</th><th>Ack breaches</th><th>Resolve breaches</th><th>Breach rate</th></tr></thead>
+    <tbody>
+    {% for r in sla %}
+      <tr><td>{{ r.service }}</td><td><span class="sev {{ r.severity|lower }}">{{ r.severity }}</span></td><td>{{ r.incidents }}</td>
+        <td>{{ r.ack_breaches }}</td><td>{{ r.resolve_breaches }}</td>
+        <td><div class="bar"><span style="width: {{ r.breach_rate }}%"></span></div>{{ r.breach_rate }}%</td></tr>
+    {% else %}<tr><td colspan="6" class="empty">No incidents in this period.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h2>Mean time to acknowledge / resolve</h2>
+  <table class="grid">
+    <thead><tr><th>Service</th><th>Severity</th><th>Resolved</th><th>MTTA</th><th>MTTR</th><th>Worst</th></tr></thead>
+    <tbody>
+    {% for r in mttr %}
+      <tr><td>{{ r.service }}</td><td><span class="sev {{ r.severity|lower }}">{{ r.severity }}</span></td><td>{{ r.resolved }}</td>
+        <td>{{ (r.mtta_minutes * 60)|duration if r.mtta_minutes is not none else '—' }}</td>
+        <td>{{ (r.mttr_minutes * 60)|duration }}</td><td>{{ (r.worst_minutes * 60)|duration }}</td></tr>
+    {% else %}<tr><td colspan="6" class="empty">No resolved incidents in this period.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<div class="two-col">
+  <section class="panel">
+    <h2>AI suggestions by source</h2>
+    <table class="grid">
+      <thead><tr><th>Source</th><th>Total</th><th>Approved</th><th>Edited</th><th>Rejected</th><th>Acceptance</th></tr></thead>
+      <tbody>
+      {% for r in ai.by_source %}
+        <tr><td>{{ r.source|upper }}</td><td>{{ r.total }}</td><td>{{ r.approved }}</td><td>{{ r.edited }}</td><td>{{ r.rejected }}</td>
+          <td>{{ r.acceptance_rate if r.acceptance_rate is not none else '—' }}{% if r.acceptance_rate is not none %}%{% endif %}</td></tr>
+      {% else %}<tr><td colspan="6" class="empty">No suggestions yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </section>
+  <section class="panel">
+    <h2>Top-ranked runbooks</h2>
+    <table class="grid">
+      <thead><tr><th>Runbook</th><th>Ranked #1</th><th>Accepted</th></tr></thead>
+      <tbody>
+      {% for r in runbooks %}<tr><td>{{ r.title }}</td><td>{{ r.times_top_ranked }}</td><td>{{ r.accepted }}</td></tr>
+      {% else %}<tr><td colspan="3" class="empty">No retrievals yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </section>
+</div>
+{% endblock %}
