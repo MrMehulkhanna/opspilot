@@ -49,9 +49,14 @@ def test_two_bursts_separated_by_quiet_period_are_two_episodes():
 
 
 def test_rate_hovering_near_threshold_does_not_flap():
-    # ~1 error every 5.5s keeps the 60s window at 10-11 errors, then dips to 9-10
-    recs = errors("api", 60, every=5.5)
-    assert len(detect_spikes(recs, window_seconds=60, threshold=10)) == 1
+    # Burst over threshold, then a steady 8-9 errors/minute (just under it),
+    # then another burst. Without hysteresis this would be two episodes.
+    recs = errors("api", 10)
+    recs += errors("api", 27, start=T0 + timedelta(seconds=10), every=7)
+    recs += errors("api", 10, start=T0 + timedelta(seconds=200), every=0.1)
+    spikes = detect_spikes(recs, window_seconds=60, threshold=10)
+    assert len(spikes) == 1
+    assert spikes[0].total_errors == 47
 
 
 def test_services_are_tracked_independently():
