@@ -15,7 +15,13 @@ def upsert(conn: Connection, slug: str, title: str, body: str, service_tag: str 
                 "UPDATE runbooks SET title = :title, body = :body, service_tag = :tag,"
                 " updated_at = :now WHERE id = :id"
             ),
-            {"title": title, "body": body, "tag": service_tag, "now": utcnow(), "id": existing["id"]},
+            {
+                "title": title,
+                "body": body,
+                "tag": service_tag,
+                "now": utcnow(),
+                "id": existing["id"],
+            },
         )
         return existing["id"]
     return insert_returning_id(

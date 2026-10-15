@@ -16,8 +16,40 @@ from collections.abc import Sequence
 
 _TOKEN = re.compile(r"[a-z0-9]+")
 STOPWORDS = frozenset(
-    "a an and are as at be by for from has have in is it its of on or that the this to "
-    "was were will with when then if not no".split()
+    [
+        "a",
+        "an",
+        "and",
+        "are",
+        "as",
+        "at",
+        "be",
+        "by",
+        "for",
+        "from",
+        "has",
+        "have",
+        "in",
+        "is",
+        "it",
+        "its",
+        "of",
+        "on",
+        "or",
+        "that",
+        "the",
+        "this",
+        "to",
+        "was",
+        "were",
+        "will",
+        "with",
+        "when",
+        "then",
+        "if",
+        "not",
+        "no",
+    ]
 )
 
 

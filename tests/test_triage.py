@@ -63,7 +63,9 @@ def test_rules_suggestion_cites_retrieved_runbook(conn, incident):
 
 
 def test_llm_suggestion_used_when_valid(conn, incident):
-    llm = FakeLLM('{"probable_cause": "Leaked sessions", "steps": ["Kill idle tx"], "severity": "SEV1"}')
+    llm = FakeLLM(
+        '{"probable_cause": "Leaked sessions", "steps": ["Kill idle tx"], "severity": "SEV1"}'
+    )
     s = suggest(conn, incident["id"], llm=llm)
     assert (s["source"], s["model"], s["suggested_severity"]) == ("llm", "fake-model", "SEV1")
     assert "Database connection pool exhausted" in llm.prompts[0]

@@ -113,7 +113,9 @@ def _acceptance_row(row: dict) -> dict:
     row = {k: (int(v) if k != "source" and v is not None else v) for k, v in row.items()}
     reviewed = row["approved"] + row["edited"] + row["rejected"]
     row["reviewed"] = reviewed
-    row["acceptance_rate"] = _num(100.0 * (row["approved"] + row["edited"]) / reviewed) if reviewed else None
+    row["acceptance_rate"] = (
+        _num(100.0 * (row["approved"] + row["edited"]) / reviewed) if reviewed else None
+    )
     row["as_is_rate"] = _num(100.0 * row["approved"] / reviewed) if reviewed else None
     return row
 

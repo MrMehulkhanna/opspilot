@@ -32,7 +32,10 @@ def test_pages_render(client, seeded, path):
 
 
 def test_post_without_csrf_rejected(client, seeded):
-    assert client.post(f"/incidents/{seeded}/transition", data={"status": "acknowledged"}).status_code == 400
+    assert (
+        client.post(f"/incidents/{seeded}/transition", data={"status": "acknowledged"}).status_code
+        == 400
+    )
 
 
 def test_engineer_reviews_suggestion_through_dashboard(client, seeded):
@@ -46,7 +49,11 @@ def test_engineer_reviews_suggestion_through_dashboard(client, seeded):
 
     res = client.post(
         f"/suggestions/{suggestion_id}/review",
-        data={"csrf": token, "decision": "edit", "steps": "Fail over to backup provider\nWatch error rate"},
+        data={
+            "csrf": token,
+            "decision": "edit",
+            "steps": "Fail over to backup provider\nWatch error rate",
+        },
         follow_redirects=True,
     )
     html = res.get_data(as_text=True)

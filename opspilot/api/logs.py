@@ -47,4 +47,6 @@ def analyze():
 @api_bp.get("/logs/ingests")
 def recent_ingests():
     with get_engine().connect() as conn:
-        return jsonify(ingests=ingests.recent(conn, limit=int_arg("limit", 10, minimum=1, maximum=100)))
+        return jsonify(
+            ingests=ingests.recent(conn, limit=int_arg("limit", 10, minimum=1, maximum=100))
+        )

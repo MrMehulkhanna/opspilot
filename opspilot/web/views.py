@@ -50,7 +50,9 @@ def index():
     for row in rows:
         row["sla"] = lifecycle.sla_state(row, now)
     active = sum(sum(overview.get(s, {}).values()) for s in lifecycle.ACTIVE_STATUSES)
-    breaching = sum(1 for r in rows if r["status"] in lifecycle.ACTIVE_STATUSES and r["sla"]["resolve_breached"])
+    breaching = sum(
+        1 for r in rows if r["status"] in lifecycle.ACTIVE_STATUSES and r["sla"]["resolve_breached"]
+    )
     return render_template(
         "incidents.html",
         incidents=rows,
@@ -87,7 +89,9 @@ def incident_detail(incident_id: int):
         timeline=timeline,
         suggestions=ai,
         team=team,
-        next_statuses=sorted(lifecycle.allowed_next(incident["status"]), key=lifecycle.STATUSES.index),
+        next_statuses=sorted(
+            lifecycle.allowed_next(incident["status"]), key=lifecycle.STATUSES.index
+        ),
         llm_enabled=get_llm() is not None,
     )
 
@@ -116,7 +120,9 @@ def incident_comment(incident_id: int):
 @handles_domain_errors
 def incident_suggest(incident_id: int):
     with get_engine().begin() as conn:
-        s = triage.suggest(conn, incident_id, llm=get_llm(), top_k=current_app.config["RUNBOOK_TOP_K"])
+        s = triage.suggest(
+            conn, incident_id, llm=get_llm(), top_k=current_app.config["RUNBOOK_TOP_K"]
+        )
     flash(f"New {s['source'].upper()} suggestion ready for review.", "ok")
     return redirect(url_for("web.incident_detail", incident_id=incident_id))
 

@@ -34,8 +34,14 @@ def _incident(conn, service, severity, ack_after=None, resolve_after=None, at=T0
 def test_sla_breach_report(conn):
     # SEV1: ack 15m / resolve 4h
     _incident(conn, "payments-api", "SEV1", timedelta(minutes=5), timedelta(hours=1))
-    _incident(conn, "payments-api", "SEV1", timedelta(minutes=40), timedelta(hours=6),
-              at=T0 + timedelta(days=1))
+    _incident(
+        conn,
+        "payments-api",
+        "SEV1",
+        timedelta(minutes=40),
+        timedelta(hours=6),
+        at=T0 + timedelta(days=1),
+    )
     _incident(conn, "auth", "SEV3")  # never acknowledged
     rows = reports.sla_breaches(conn, since=SINCE, now=T0 + timedelta(days=5))
     by_key = {(r["service"], r["severity"]): r for r in rows}
@@ -54,8 +60,14 @@ def test_sla_report_respects_since(conn):
 
 def test_mean_time_to_resolve(conn):
     _incident(conn, "search", "SEV2", timedelta(minutes=10), timedelta(minutes=60))
-    _incident(conn, "search", "SEV2", timedelta(minutes=20), timedelta(minutes=120),
-              at=T0 + timedelta(days=1))
+    _incident(
+        conn,
+        "search",
+        "SEV2",
+        timedelta(minutes=20),
+        timedelta(minutes=120),
+        at=T0 + timedelta(days=1),
+    )
     _incident(conn, "auth", "SEV2", timedelta(minutes=5))  # unresolved: excluded
     rows = reports.mean_time_to_resolve(conn, since=SINCE)
     assert len(rows) == 1
@@ -80,8 +92,14 @@ def test_ai_acceptance_rate_and_runbook_usefulness(conn):
         )
         s = suggest(conn, inc["id"])
         if decision:
-            review(conn, s["id"], decision=decision, reviewer_id=lead,
-                   edited_steps=steps, comment="not relevant" if decision == "reject" else None)
+            review(
+                conn,
+                s["id"],
+                decision=decision,
+                reviewer_id=lead,
+                edited_steps=steps,
+                comment="not relevant" if decision == "reject" else None,
+            )
 
     result = reports.ai_acceptance(conn, since=SINCE)
     overall = result["overall"]

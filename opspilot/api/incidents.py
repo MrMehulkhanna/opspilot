@@ -108,7 +108,9 @@ def create_suggestion(incident_id: int):
 def review_suggestion(suggestion_id: int):
     data = json_body()
     steps = data.get("steps")
-    if steps is not None and not (isinstance(steps, list) and all(isinstance(s, str) for s in steps)):
+    if steps is not None and not (
+        isinstance(steps, list) and all(isinstance(s, str) for s in steps)
+    ):
         raise ValidationError("steps must be a list of strings")
     with get_engine().begin() as conn:
         suggestion = triage.review(

@@ -1,8 +1,8 @@
 """Generate and review AI triage suggestions.
 
-    incident -> BM25 runbook retrieval -> LLM (if configured) -> validate
-                                       \\-> rule-based fallback on any failure
-    suggestion (pending) -> engineer approves / edits / rejects -> audited
+incident -> BM25 runbook retrieval -> LLM (if configured) -> validate
+                                   \\-> rule-based fallback on any failure
+suggestion (pending) -> engineer approves / edits / rejects -> audited
 """
 
 from __future__ import annotations
@@ -54,7 +54,11 @@ def suggest(
         severity=result["severity"],
         runbooks=retrieved,
     )
-    detail = {"suggestion_id": suggestion_id, "source": source, "runbooks": [r.slug for r in retrieved]}
+    detail = {
+        "suggestion_id": suggestion_id,
+        "source": source,
+        "runbooks": [r.slug for r in retrieved],
+    }
     if fallback_reason:
         detail["fallback_reason"] = fallback_reason
     events.record(conn, incident_id, "ai_suggested", detail=detail)
@@ -109,7 +113,8 @@ def review(
         suggestion["incident_id"],
         f"ai_{status}",
         actor_id=reviewer_id,
-        detail={"suggestion_id": suggestion_id, "comment": comment} if comment else
-        {"suggestion_id": suggestion_id},
+        detail={"suggestion_id": suggestion_id, "comment": comment}
+        if comment
+        else {"suggestion_id": suggestion_id},
     )
     return suggestions.get(conn, suggestion_id)

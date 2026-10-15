@@ -1,10 +1,10 @@
 """Load runbooks from Markdown files with a small front-matter header.
 
-    ---
-    title: Database connection pool exhausted
-    service: orders-db
-    ---
-    body...
+---
+title: Database connection pool exhausted
+service: orders-db
+---
+body...
 """
 
 from __future__ import annotations

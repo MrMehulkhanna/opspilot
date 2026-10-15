@@ -90,8 +90,13 @@ def _handle(conn, incident_id: int, rng: random.Random, team: list[int], final: 
         steps = suggestion["suggested_steps"][:2] + ["Confirm error rate is back to baseline"]
         review(conn, suggestion["id"], decision="edit", reviewer_id=engineer, edited_steps=steps)
     else:
-        review(conn, suggestion["id"], decision="reject", reviewer_id=engineer,
-               comment="Cause was a config change, not covered by the runbook")
+        review(
+            conn,
+            suggestion["id"],
+            decision="reject",
+            reviewer_id=engineer,
+            comment="Cause was a config change, not covered by the runbook",
+        )
 
     at += timedelta(minutes=rng.randint(5, 30))
     incidents.transition(conn, incident_id, "investigating", actor_id=engineer, at=at)
@@ -99,8 +104,14 @@ def _handle(conn, incident_id: int, rng: random.Random, team: list[int], final: 
         return
     at += timedelta(minutes=rng.choice([20, 45, 90, 180, 420, 900]))
     incidents.transition(
-        conn, incident_id, "resolved", actor_id=engineer, at=at,
+        conn,
+        incident_id,
+        "resolved",
+        actor_id=engineer,
+        at=at,
         note="Applied runbook steps; error rate back to baseline",
     )
     if rng.random() < 0.7:
-        incidents.transition(conn, incident_id, "closed", actor_id=engineer, at=at + timedelta(hours=1))
+        incidents.transition(
+            conn, incident_id, "closed", actor_id=engineer, at=at + timedelta(hours=1)
+        )

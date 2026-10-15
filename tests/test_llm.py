@@ -14,12 +14,19 @@ INCIDENT = {
     "error_count": 42,
 }
 RUNBOOK = RetrievedRunbook(
-    id=1, slug="pool", title="Pool exhausted", body="1. Check sessions\n2. Kill leaks\n", score=3.2, rank=1
+    id=1,
+    slug="pool",
+    title="Pool exhausted",
+    body="1. Check sessions\n2. Kill leaks\n",
+    score=3.2,
+    rank=1,
 )
 
 
 def test_parse_suggestion_accepts_wrapped_json():
-    raw = 'Sure!\n{"probable_cause": "Leaked connections", "steps": ["a", " b "], "severity": "SEV1"}'
+    raw = (
+        'Sure!\n{"probable_cause": "Leaked connections", "steps": ["a", " b "], "severity": "SEV1"}'
+    )
     assert parse_suggestion(raw) == {
         "probable_cause": "Leaked connections",
         "steps": ["a", "b"],

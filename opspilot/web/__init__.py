@@ -7,7 +7,11 @@ import secrets
 from flask import Blueprint, abort, request, session
 
 web_bp = Blueprint(
-    "web", __name__, template_folder="../templates", static_folder="../static", static_url_path="/static"
+    "web",
+    __name__,
+    template_folder="../templates",
+    static_folder="../static",
+    static_url_path="/static",
 )
 
 

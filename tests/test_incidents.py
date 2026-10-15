@@ -52,7 +52,9 @@ def test_second_active_incident_for_service_conflicts(conn):
 
 def test_full_lifecycle_writes_audit_trail(conn, asha):
     inc = _open(conn)
-    incidents.transition(conn, inc["id"], "acknowledged", actor_id=asha, at=T0 + timedelta(minutes=3))
+    incidents.transition(
+        conn, inc["id"], "acknowledged", actor_id=asha, at=T0 + timedelta(minutes=3)
+    )
     incidents.transition(conn, inc["id"], "investigating", actor_id=asha)
     incidents.transition(conn, inc["id"], "resolved", actor_id=asha, note="Rolled back deploy")
     final = incidents.transition(conn, inc["id"], "closed", actor_id=asha)

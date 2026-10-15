@@ -50,7 +50,9 @@ def create_app(config: Config | None = None, *, llm: LLMClient | None = None) ->
     register_cli(app)
 
     if not app.debug and not app.testing:
-        logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+        logging.basicConfig(
+            level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s"
+        )
     return app
 
 

@@ -13,9 +13,8 @@ from sqlalchemy.exc import IntegrityError
 
 from opspilot import lifecycle
 from opspilot.errors import Conflict, NotFound, ValidationError
-from opspilot.store import engineers, events
+from opspilot.store import engineers, events, services
 from opspilot.store import incidents as store
-from opspilot.store import services
 from opspilot.timeutil import utcnow
 
 

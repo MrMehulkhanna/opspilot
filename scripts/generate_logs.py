@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Write a synthetic application log with injected error spikes.
 
-    python scripts/generate_logs.py --minutes 360 --out sample_logs/app.log
+python scripts/generate_logs.py --minutes 360 --out sample_logs/app.log
 """
 
 from __future__ import annotations

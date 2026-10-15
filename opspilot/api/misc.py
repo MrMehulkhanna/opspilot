@@ -62,4 +62,6 @@ def create_engineer():
 def list_runbooks():
     with get_engine().connect() as conn:
         rows = runbooks.list_all(conn)
-    return jsonify(runbooks=[{k: r[k] for k in ("id", "slug", "title", "service_tag")} for r in rows])
+    return jsonify(
+        runbooks=[{k: r[k] for k in ("id", "slug", "title", "service_tag")} for r in rows]
+    )

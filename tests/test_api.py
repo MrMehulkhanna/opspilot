@@ -43,11 +43,16 @@ def test_analyze_accepts_raw_text_and_validates(client):
 def test_lifecycle_over_api(client, engineer, incident_id):
     hdr = {"X-Engineer-Id": str(engineer)}
     url = f"/api/v1/incidents/{incident_id}"
-    assert client.post(url + "/transition", json={"status": "acknowledged"}, headers=hdr).status_code == 200
+    assert (
+        client.post(url + "/transition", json={"status": "acknowledged"}, headers=hdr).status_code
+        == 200
+    )
     no_note = client.post(url + "/transition", json={"status": "resolved"}, headers=hdr)
     assert no_note.status_code == 409
     assert "resolution note" in no_note.get_json()["error"]
-    ok = client.post(url + "/transition", json={"status": "resolved", "note": "pool raised"}, headers=hdr)
+    ok = client.post(
+        url + "/transition", json={"status": "resolved", "note": "pool raised"}, headers=hdr
+    )
     assert ok.get_json()["status"] == "resolved"
     detail = client.get(url).get_json()
     assert detail["allowed_transitions"] == ["closed", "investigating"]

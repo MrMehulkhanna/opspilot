@@ -33,7 +33,13 @@ class Burst:
 
 
 DEFAULT_BURSTS = (
-    ("payments-api", 45, 180, 0.6, "gateway timeout: upstream payment provider timed out after 30s"),
+    (
+        "payments-api",
+        45,
+        180,
+        0.6,
+        "gateway timeout: upstream payment provider timed out after 30s",
+    ),
     ("orders-db", 120, 240, 0.35, "timeout acquiring connection: connection pool exhausted"),
     ("auth", 200, 90, 0.25, "jwt signature verification failed: unknown key id"),
     ("notifications", 300, 300, 0.12, "consumer lag growing: message processing timeout"),
@@ -85,7 +91,11 @@ def generate(
     for ts, level, service, message in events:
         stamp = ts.strftime("%Y-%m-%dT%H:%M:%S.") + f"{ts.microsecond // 1000:03d}Z"
         if rng.random() < json_ratio:
-            lines.append(json.dumps({"ts": stamp, "level": level.lower(), "service": service, "msg": message}))
+            lines.append(
+                json.dumps(
+                    {"ts": stamp, "level": level.lower(), "service": service, "msg": message}
+                )
+            )
         else:
             lines.append(f"{stamp} {level} {service} {message}")
     return lines

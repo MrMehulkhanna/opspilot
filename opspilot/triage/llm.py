@@ -72,9 +72,10 @@ SYSTEM_PROMPT = (
 
 
 def build_prompt(incident: dict, runbooks: list[RetrievedRunbook]) -> str:
-    context = "\n\n".join(
-        f"[Runbook {rb.rank}: {rb.title}]\n{rb.body[:1500]}" for rb in runbooks
-    ) or "(no matching runbooks)"
+    context = (
+        "\n\n".join(f"[Runbook {rb.rank}: {rb.title}]\n{rb.body[:1500]}" for rb in runbooks)
+        or "(no matching runbooks)"
+    )
     return (
         f"Incident #{incident['id']} on service '{incident['service_name']}'\n"
         f"Severity: {incident['severity']}\n"
