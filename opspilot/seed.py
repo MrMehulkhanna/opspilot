@@ -11,6 +11,7 @@ import random
 from datetime import timedelta
 from pathlib import Path
 
+from sqlalchemy import text
 from sqlalchemy.engine import Engine
 
 from opspilot import incidents
@@ -41,6 +42,8 @@ BURST_TEMPLATES = (
 def seed_demo(engine: Engine, runbook_dir: Path, days: int = 14, seed: int = 42) -> str:
     rng = random.Random(seed)
     with engine.begin() as conn:
+        if conn.execute(text("SELECT COUNT(*) FROM incidents")).scalar_one():
+            return "database already has incidents; demo seed skipped"
         load_directory(conn, runbook_dir)
         team = []
         for name, email, role in ENGINEERS:
