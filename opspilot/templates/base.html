@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}OpsPilot{% endblock %} · OpsPilot</title>
+  <link rel="stylesheet" href="{{ url_for('web.static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('web.index') }}"><span class="logo">◆</span> OpsPilot</a>
+    <nav>
+      <a href="{{ url_for('web.index') }}" class="{{ 'active' if request.endpoint in ('web.index', 'web.incident_detail') }}">Incidents</a>
+      <a href="{{ url_for('web.ingest') }}" class="{{ 'active' if request.endpoint == 'web.ingest' }}">Analyze logs</a>
+      <a href="{{ url_for('web.reports_page') }}" class="{{ 'active' if request.endpoint == 'web.reports_page' }}">Reports</a>
+      <a href="{{ url_for('web.runbook_list') }}" class="{{ 'active' if request.endpoint == 'web.runbook_list' }}">Runbooks</a>
+    </nav>
+    {% if team is defined %}
+    <form class="actor" method="post" action="{{ url_for('web.act_as') }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <label for="engineer_id">Acting as</label>
+      <select id="engineer_id" name="engineer_id" onchange="this.form.submit()">
+        <option value="">— choose —</option>
+        {% for e in team %}
+        <option value="{{ e.id }}" {{ 'selected' if e.id == current_engineer_id }}>{{ e.name }}</option>
+        {% endfor %}
+      </select>
+      <noscript><button>Set</button></noscript>
+    </form>
+    {% endif %}
+  </header>
+  <main>
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+    <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

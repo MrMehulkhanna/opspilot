@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Incidents{% endblock %}
+{% block content %}
+<section class="cards">
+  <div class="card"><div class="label">Active incidents</div><div class="value">{{ active }}</div></div>
+  <div class="card {{ 'danger' if breaching }}"><div class="label">Past resolve SLA</div><div class="value">{{ breaching }}</div></div>
+  {% for sev in severities %}
+  <div class="card"><div class="label">{{ sev }} open</div>
+    <div class="value">{{ (overview.get('open', {}).get(sev, 0)) + (overview.get('acknowledged', {}).get(sev, 0)) + (overview.get('investigating', {}).get(sev, 0)) }}</div></div>
+  {% endfor %}
+</section>
+
+<form class="filters" method="get">
+  <select name="status">
+    <option value="">All statuses</option>
+    {% for s in statuses %}<option value="{{ s }}" {{ 'selected' if s == status }}>{{ s|capitalize }}</option>{% endfor %}
+  </select>
+  <select name="severity">
+    <option value="">All severities</option>
+    {% for s in severities %}<option value="{{ s }}" {{ 'selected' if s == severity }}>{{ s }}</option>{% endfor %}
+  </select>
+  <button>Filter</button>
+</form>
+
+<table class="grid">
+  <thead><tr><th>#</th><th>Sev</th><th>Service</th><th>Title</th><th>Status</th><th>Opened</th><th>SLA</th><th>Owner</th></tr></thead>
+  <tbody>
+  {% for i in incidents %}
+    <tr>
+      <td><a href="{{ url_for('web.incident_detail', incident_id=i.id) }}">{{ i.id }}</a></td>
+      <td><span class="sev {{ i.severity|lower }}">{{ i.severity }}</span></td>
+      <td>{{ i.service_name }}</td>
+      <td class="title"><a href="{{ url_for('web.incident_detail', incident_id=i.id) }}">{{ i.title }}</a></td>
+      <td><span class="status {{ i.status }}">{{ i.status }}</span></td>
+      <td>{{ i.opened_at|ts }}</td>
+      <td>
+        {% if i.sla.resolve_seconds_remaining is not none %}
+          <span class="sla {{ 'breached' if i.sla.resolve_breached else 'ok' }}">{{ i.sla.resolve_seconds_remaining|duration }}</span>
+        {% elif i.sla.resolve_breached %}<span class="sla breached">missed</span>
+        {% else %}<span class="sla met">met</span>{% endif %}
+      </td>
+      <td>{{ i.assignee_name or '—' }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="empty">No incidents yet. <a href="{{ url_for('web.ingest') }}">Analyze a log file</a> to get started.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

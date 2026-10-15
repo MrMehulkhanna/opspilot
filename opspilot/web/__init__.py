@@ -31,3 +31,26 @@ def _inject():
 
 
 from opspilot.web import views  # noqa: E402,F401
+
+
+@web_bp.app_template_filter("duration")
+def _duration(seconds) -> str:
+    """Compact human duration: 3h 20m, 45m, 2d 4h. Negative = overdue."""
+    if seconds is None:
+        return "—"
+    seconds = int(seconds)
+    sign = "-" if seconds < 0 else ""
+    seconds = abs(seconds)
+    days, rem = divmod(seconds, 86400)
+    hours, rem = divmod(rem, 3600)
+    minutes = rem // 60
+    if days:
+        return f"{sign}{days}d {hours}h"
+    if hours:
+        return f"{sign}{hours}h {minutes}m"
+    return f"{sign}{minutes}m"
+
+
+@web_bp.app_template_filter("ts")
+def _ts(value) -> str:
+    return value.strftime("%d %b %H:%M") if value else "—"
