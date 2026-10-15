@@ -99,6 +99,10 @@
           {% elif e.kind == 'spike' %}spike: {{ e.detail.peak_errors_in_window }} errors / {{ e.detail.window_seconds }}s
           {% elif e.kind == 'comment' %}commented
           {% elif e.kind == 'assigned' %}assigned {{ e.detail.assignee }}
+          {% elif e.kind == 'ai_suggested' %}generated a {{ e.detail.source|upper }} triage suggestion
+          {% elif e.kind == 'ai_approved' %}approved the AI suggestion
+          {% elif e.kind == 'ai_edited' %}edited and accepted the AI suggestion
+          {% elif e.kind == 'ai_rejected' %}rejected the AI suggestion
           {% else %}{{ e.kind|replace('_', ' ') }}{% endif %}
           {% if e.detail and (e.detail.note or e.detail.body) %}<p>{{ e.detail.note or e.detail.body }}</p>{% endif %}
         </li>
