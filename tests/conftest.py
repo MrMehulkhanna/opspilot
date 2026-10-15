@@ -29,3 +29,24 @@ def engine(db_url):
     yield eng
     drop_all(eng)
     eng.dispose()
+
+
+@pytest.fixture
+def app(db_url):
+    from opspilot.app import create_app
+    from opspilot.config import Config
+
+    drop_all(make_engine(db_url))
+    application = create_app(
+        Config(DATABASE_URL=db_url, SECRET_KEY="test", LLM_API_KEY="", TESTING=True)
+    )
+    application.testing = True
+    yield application
+    engine = application.extensions["opspilot.engine"]
+    drop_all(engine)
+    engine.dispose()
+
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
