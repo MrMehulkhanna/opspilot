@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}#{{ incident.id }} {{ incident.service_name }}{% endblock %}
+{% block content %}
+<a class="back" href="{{ url_for('web.index') }}">← All incidents</a>
+<div class="incident-head">
+  <h1><span class="sev {{ incident.severity|lower }}">{{ incident.severity }}</span> #{{ incident.id }} · {{ incident.title }}</h1>
+  <div class="meta">
+    <span class="status {{ incident.status }}">{{ incident.status }}</span>
+    <span>Service <b>{{ incident.service_name }}</b> ({{ incident.service_team }})</span>
+    <span>Owner <b>{{ incident.assignee_name or 'unassigned' }}</b></span>
+    <span>{{ incident.error_count }} errors</span>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="main-col">
+    <section class="panel">
+      <h2>SLA</h2>
+      <dl class="sla-grid">
+        <dt>Opened</dt><dd>{{ incident.opened_at|ts }}</dd>
+        <dt>Acknowledge by</dt>
+        <dd>{{ incident.ack_due_at|ts }} {% if sla.ack_breached %}<span class="sla breached">breached</span>{% elif incident.acknowledged_at %}<span class="sla met">met</span>{% endif %}</dd>
+        <dt>Resolve by</dt>
+        <dd>{{ incident.resolve_due_at|ts }}
+          {% if sla.resolve_breached %}<span class="sla breached">breached</span>
+          {% elif sla.resolve_seconds_remaining is not none %}<span class="sla ok">{{ sla.resolve_seconds_remaining|duration }} left</span>
+          {% else %}<span class="sla met">met</span>{% endif %}</dd>
+        {% if incident.resolution_note %}<dt>Resolution</dt><dd>{{ incident.resolution_note }}</dd>{% endif %}
+      </dl>
+      {% if incident.sample_message %}<pre class="sample">{{ incident.sample_message }}</pre>{% endif %}
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>AI triage</h2>
+        {% if incident.status != 'closed' %}
+        <form method="post" action="{{ url_for('web.incident_suggest', incident_id=incident.id) }}">
+          <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+          <button class="secondary">{{ 'Ask AI' if llm_enabled else 'Suggest (rules)' }}</button>
+        </form>
+        {% endif %}
+      </div>
+      {% for s in suggestions %}
+      <article class="suggestion {{ s.status }}">
+        <header>
+          <span class="pill">{{ s.source|upper }}{% if s.model %} · {{ s.model }}{% endif %}</span>
+          <span class="pill state {{ s.status }}">{{ s.status }}</span>
+          {% if s.suggested_severity and s.suggested_severity != incident.severity %}<span class="pill">suggests {{ s.suggested_severity }}</span>{% endif %}
+          <time>{{ s.created_at|ts }}</time>
+        </header>
+        <p><b>Probable cause:</b> {{ s.probable_cause }}</p>
+        <ol>{% for step in (s.final_steps or s.suggested_steps) %}<li>{{ step }}</li>{% endfor %}</ol>
+        {% if s.runbooks %}<p class="cites">Runbooks: {% for r in s.runbooks %}<span title="BM25 {{ '%.2f'|format(r.score) }}">{{ r.rank }}. {{ r.title }}</span>{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+        {% if s.review_comment %}<p class="cites">Reviewer: {{ s.review_comment }}</p>{% endif %}
+        {% if s.status == 'pending' %}
+        <form class="review" method="post" action="{{ url_for('web.suggestion_review', suggestion_id=s.id) }}">
+          <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+          <details>
+            <summary>Edit steps before accepting</summary>
+            <textarea name="steps" rows="5">{{ s.suggested_steps|join('\n') }}</textarea>
+          </details>
+          <input name="comment" placeholder="Comment (required to reject)">
+          <div class="buttons">
+            <button name="decision" value="approve">Approve</button>
+            <button name="decision" value="edit" class="secondary">Save edits</button>
+            <button name="decision" value="reject" class="danger">Reject</button>
+          </div>
+        </form>
+        {% endif %}
+      </article>
+      {% else %}
+      <p class="empty">No suggestions yet. Every suggestion needs an engineer's approval before it is used.</p>
+      {% endfor %}
+    </section>
+  </div>
+
+  <aside class="side-col">
+    {% if next_statuses %}
+    <section class="panel">
+      <h2>Move to</h2>
+      <form method="post" action="{{ url_for('web.incident_transition', incident_id=incident.id) }}" class="stack">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <select name="status">{% for s in next_statuses %}<option value="{{ s }}">{{ s|capitalize }}</option>{% endfor %}</select>
+        <textarea name="note" rows="2" placeholder="Note (required when resolving)"></textarea>
+        <button>Update status</button>
+      </form>
+    </section>
+    {% endif %}
+
+    <section class="panel">
+      <h2>Timeline</h2>
+      <ol class="timeline">
+      {% for e in timeline %}
+        <li class="ev {{ e.kind }}">
+          <time>{{ e.created_at|ts }}</time>
+          <b>{{ e.actor_name }}</b>
+          {% if e.kind == 'status_change' %}moved {{ e.from_status }} → {{ e.to_status }}
+          {% elif e.kind == 'created' %}opened the incident
+          {% elif e.kind == 'spike' %}spike: {{ e.detail.peak_errors_in_window }} errors / {{ e.detail.window_seconds }}s
+          {% elif e.kind == 'comment' %}commented
+          {% elif e.kind == 'assigned' %}assigned {{ e.detail.assignee }}
+          {% else %}{{ e.kind|replace('_', ' ') }}{% endif %}
+          {% if e.detail and (e.detail.note or e.detail.body) %}<p>{{ e.detail.note or e.detail.body }}</p>{% endif %}
+        </li>
+      {% endfor %}
+      </ol>
+      <form method="post" action="{{ url_for('web.incident_comment', incident_id=incident.id) }}" class="stack">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <textarea name="body" rows="2" placeholder="Add a comment"></textarea>
+        <button class="secondary">Comment</button>
+      </form>
+    </section>
+  </aside>
+</div>
+{% endblock %}
