@@ -36,7 +36,9 @@ def app(db_url):
     from opspilot.app import create_app
     from opspilot.config import Config
 
-    drop_all(make_engine(db_url))
+    setup_engine = make_engine(db_url)
+    drop_all(setup_engine)
+    setup_engine.dispose()
     application = create_app(
         Config(DATABASE_URL=db_url, SECRET_KEY="test", LLM_API_KEY="", TESTING=True)
     )
